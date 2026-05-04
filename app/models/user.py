@@ -1,11 +1,17 @@
+from __future__ import annotations
+
 from datetime import datetime
+from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
 from sqlalchemy import DateTime, String, true, func
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import Uuid
 
 from app.db.base import Base
+
+if TYPE_CHECKING:
+    from app.models.social_account import SocialAccount
 
 
 class User(Base):
@@ -27,4 +33,8 @@ class User(Base):
         DateTime(timezone=True),
         server_default=func.now(),
         onupdate=func.now(),
+    )
+    social_accounts: Mapped[list[SocialAccount]] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan",
     )
