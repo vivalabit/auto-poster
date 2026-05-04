@@ -11,6 +11,7 @@ from sqlalchemy.types import Uuid
 from app.db.base import Base
 
 if TYPE_CHECKING:
+    from app.models.post import Post
     from app.models.user import User
 
 TIKTOK_PLATFORM = "tiktok"
@@ -61,3 +62,7 @@ class SocialAccount(Base):
     )
 
     user: Mapped[User] = relationship(back_populates="social_accounts")
+    posts: Mapped[list[Post]] = relationship(
+        back_populates="social_account",
+        cascade="all, delete-orphan",
+    )

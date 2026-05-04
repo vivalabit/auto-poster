@@ -11,6 +11,7 @@ from sqlalchemy.types import Uuid
 from app.db.base import Base
 
 if TYPE_CHECKING:
+    from app.models.post import Post
     from app.models.user import User
 
 LOCAL_STORAGE_PROVIDER = "local"
@@ -68,3 +69,4 @@ class MediaAsset(Base):
     )
 
     user: Mapped[User] = relationship(back_populates="media_assets")
+    posts: Mapped[list[Post]] = relationship(back_populates="media")
