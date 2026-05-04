@@ -12,6 +12,7 @@ def test_post_defaults_to_draft_with_empty_content() -> None:
     assert post.hashtags is None or post.hashtags == []
     assert post.status is None or post.status == "draft"
     assert post.media_id is None
+    assert post.scheduled_at is None
 
 
 def test_post_status_values_match_workflow() -> None:
