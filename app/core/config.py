@@ -31,6 +31,12 @@ class Settings(BaseSettings):
     tiktok_scopes: str = "user.info.basic,video.upload,video.publish"
     tiktok_oauth_state_secret: str = Field(default="change-me", repr=False)
 
+    media_storage_dir: str = "storage/media"
+    media_max_video_size_bytes: int = 512 * 1024 * 1024
+    media_max_video_duration_seconds: int = 600
+    media_allowed_video_extensions: str = ".mp4,.mov"
+    media_allowed_video_content_types: str = "video/mp4,video/quicktime"
+
     @property
     def database_url(self) -> str:
         return (
@@ -46,6 +52,22 @@ class Settings(BaseSettings):
     @property
     def tiktok_scope_list(self) -> list[str]:
         return [scope.strip() for scope in self.tiktok_scopes.split(",") if scope.strip()]
+
+    @property
+    def media_allowed_extension_list(self) -> list[str]:
+        return [
+            extension.strip().lower()
+            for extension in self.media_allowed_video_extensions.split(",")
+            if extension.strip()
+        ]
+
+    @property
+    def media_allowed_content_type_list(self) -> list[str]:
+        return [
+            content_type.strip().lower()
+            for content_type in self.media_allowed_video_content_types.split(",")
+            if content_type.strip()
+        ]
 
 
 @lru_cache

@@ -11,6 +11,7 @@ from sqlalchemy.types import Uuid
 from app.db.base import Base
 
 if TYPE_CHECKING:
+    from app.models.media_asset import MediaAsset
     from app.models.social_account import SocialAccount
 
 
@@ -35,6 +36,10 @@ class User(Base):
         onupdate=func.now(),
     )
     social_accounts: Mapped[list[SocialAccount]] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+    media_assets: Mapped[list[MediaAsset]] = relationship(
         back_populates="user",
         cascade="all, delete-orphan",
     )
