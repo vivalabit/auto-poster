@@ -7,6 +7,7 @@ dependencies = [
     "alembic>=1.13.0,<2.0.0",
     "celery[redis]>=5.4.0,<6.0.0",
     "fastapi>=0.115.0,<1.0.0",
+    "httpx>=0.27.0,<1.0.0",
     "psycopg[binary]>=3.2.0,<4.0.0",
     "pydantic-settings>=2.6.0,<3.0.0",
     "sqlalchemy>=2.0.0,<3.0.0",
@@ -26,7 +27,6 @@ packages = ["app"]
 
 [project.optional-dependencies]
 dev = [
-    "httpx>=0.27.0,<1.0.0",
     "pytest>=8.3.0,<9.0.0",
 ]
 

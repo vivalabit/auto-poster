@@ -25,6 +25,12 @@ class Settings(BaseSettings):
     redis_port: int = 6379
     redis_db: int = 0
 
+    tiktok_client_key: str = ""
+    tiktok_client_secret: str = Field(default="", repr=False)
+    tiktok_redirect_uri: str = "https://localhost:8000/tiktok/oauth/callback"
+    tiktok_scopes: str = "user.info.basic"
+    tiktok_oauth_state_secret: str = Field(default="change-me", repr=False)
+
     @property
     def database_url(self) -> str:
         return (
@@ -36,6 +42,10 @@ class Settings(BaseSettings):
     @property
     def redis_url(self) -> str:
         return f"redis://{self.redis_host}:{self.redis_port}/{self.redis_db}"
+
+    @property
+    def tiktok_scope_list(self) -> list[str]:
+        return [scope.strip() for scope in self.tiktok_scopes.split(",") if scope.strip()]
 
 
 @lru_cache
