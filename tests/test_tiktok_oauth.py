@@ -16,6 +16,7 @@ from app.integrations.tiktok.oauth import (
     build_authorization_url,
     ensure_fresh_tiktok_tokens,
     fetch_tiktok_account_name,
+    validate_tiktok_publishing_access,
     verify_oauth_state,
 )
 from app.main import app
@@ -83,8 +84,13 @@ def test_callback_saves_tiktok_tokens(monkeypatch) -> None:
             access_token="access",
             refresh_token="refresh",
             expires_at=datetime.now(UTC) + timedelta(hours=1),
-            scope="user.info.basic",
+            scope="user.info.basic,video.upload,video.publish",
         ),
+    )
+    monkeypatch.setattr(
+        tiktok_oauth_api,
+        "validate_tiktok_publishing_access",
+        lambda token_data: None,
     )
 
     def fake_save_tiktok_tokens(db, callback_user_id, token_data):
@@ -196,3 +202,50 @@ def test_fetch_tiktok_account_name_uses_display_name(monkeypatch) -> None:
     )
 
     assert fetch_tiktok_account_name("access-token", fallback="open-id") == "Tik Toker"
+
+
+def test_validate_tiktok_publishing_access_skips_when_not_configured(monkeypatch) -> None:
+    token_data = TikTokTokenData(
+        open_id="open-id",
+        account_name="open-id",
+        access_token="access",
+        refresh_token="refresh",
+        expires_at=datetime.now(UTC) + timedelta(hours=1),
+        scope="user.info.basic",
+    )
+    monkeypatch.setattr(oauth, "get_settings", lambda: Settings(tiktok_scopes="user.info.basic"))
+
+    validate_tiktok_publishing_access(token_data)
+
+
+def test_validate_tiktok_publishing_access_checks_configured_scopes(monkeypatch) -> None:
+    checked = {}
+    token_data = TikTokTokenData(
+        open_id="open-id",
+        account_name="open-id",
+        access_token="access",
+        refresh_token="refresh",
+        expires_at=datetime.now(UTC) + timedelta(hours=1),
+        scope="user.info.basic,video.upload,video.publish",
+    )
+
+    class FakePublishingClient:
+        def __init__(self, access_token: str) -> None:
+            checked["access_token"] = access_token
+
+        def check_publishing_access(self, granted_scopes: str) -> None:
+            checked["granted_scopes"] = granted_scopes
+
+    monkeypatch.setattr(
+        oauth,
+        "get_settings",
+        lambda: Settings(tiktok_scopes="user.info.basic,video.upload,video.publish"),
+    )
+    monkeypatch.setattr(oauth, "TikTokPublishingClient", FakePublishingClient)
+
+    validate_tiktok_publishing_access(token_data)
+
+    assert checked == {
+        "access_token": "access",
+        "granted_scopes": "user.info.basic,video.upload,video.publish",
+    }

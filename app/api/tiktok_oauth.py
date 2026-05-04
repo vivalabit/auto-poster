@@ -12,8 +12,10 @@ from app.integrations.tiktok.oauth import (
     build_authorization_url,
     exchange_code_for_tokens,
     save_tiktok_tokens,
+    validate_tiktok_publishing_access,
     verify_oauth_state,
 )
+from app.integrations.tiktok.publishing import TikTokPublishingError
 from app.models.user import User
 
 router = APIRouter(prefix="/tiktok/oauth", tags=["tiktok-oauth"])
@@ -41,6 +43,7 @@ def handle_tiktok_oauth_callback(
     try:
         user_id = verify_oauth_state(state)
         token_data = exchange_code_for_tokens(code)
+        validate_tiktok_publishing_access(token_data)
         social_account = save_tiktok_tokens(db, user_id, token_data)
     except TikTokOAuthConfigError as exc:
         raise HTTPException(
@@ -48,6 +51,11 @@ def handle_tiktok_oauth_callback(
             detail=str(exc),
         ) from exc
     except TikTokOAuthError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        ) from exc
+    except TikTokPublishingError as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(exc),

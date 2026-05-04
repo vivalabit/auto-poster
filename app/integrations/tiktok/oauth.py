@@ -16,6 +16,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
+from app.integrations.tiktok.publishing import TikTokPublishingClient
 from app.models.social_account import TIKTOK_PLATFORM, SocialAccount
 
 TIKTOK_AUTHORIZE_URL = "https://www.tiktok.com/v2/auth/authorize/"
@@ -124,6 +125,15 @@ def exchange_code_for_tokens(code: str) -> TikTokTokenData:
             fallback=token_data.open_id,
         ),
     )
+
+
+def validate_tiktok_publishing_access(token_data: TikTokTokenData) -> None:
+    settings = get_settings()
+    requested_scopes = set(settings.tiktok_scope_list)
+    if not requested_scopes.intersection({"video.publish", "video.upload"}):
+        return
+
+    TikTokPublishingClient(token_data.access_token).check_publishing_access(token_data.scope)
 
 
 def refresh_tiktok_tokens(db: Session, social_account: SocialAccount) -> SocialAccount:

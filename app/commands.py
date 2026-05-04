@@ -1,5 +1,3 @@
-import sys
-
 import uvicorn
 
 from app.core.config import get_settings
@@ -17,11 +15,9 @@ def run_api() -> None:
 
 
 def run_worker() -> None:
-    sys.argv = [
-        "celery",
-        "-A",
-        "app.worker.celery_app:celery_app",
-        "worker",
-        "--loglevel=info",
-    ]
-    celery_app.start()
+    celery_app.worker_main(
+        [
+            "worker",
+            "--loglevel=info",
+        ]
+    )

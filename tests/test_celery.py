@@ -1,4 +1,6 @@
 from app.core.config import Settings
+from app.commands import run_worker
+import app.commands as commands
 from app.worker.celery_app import celery_app
 from app.worker.tasks import ping
 
@@ -16,3 +18,16 @@ def test_celery_uses_redis_for_broker_and_backend() -> None:
 
 def test_ping_task_returns_pong() -> None:
     assert ping.run() == "pong"
+
+
+def test_worker_command_starts_celery_worker(monkeypatch) -> None:
+    worker_args = []
+
+    def fake_worker_main(args: list[str]) -> None:
+        worker_args.extend(args)
+
+    monkeypatch.setattr(commands.celery_app, "worker_main", fake_worker_main)
+
+    run_worker()
+
+    assert worker_args == ["worker", "--loglevel=info"]

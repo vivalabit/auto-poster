@@ -28,7 +28,7 @@ class Settings(BaseSettings):
     tiktok_client_key: str = ""
     tiktok_client_secret: str = Field(default="", repr=False)
     tiktok_redirect_uri: str = "https://localhost:8000/tiktok/oauth/callback"
-    tiktok_scopes: str = "user.info.basic"
+    tiktok_scopes: str = "user.info.basic,video.upload,video.publish"
     tiktok_oauth_state_secret: str = Field(default="change-me", repr=False)
 
     @property
