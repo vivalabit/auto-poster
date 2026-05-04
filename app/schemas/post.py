@@ -22,5 +22,6 @@ class PostRead(BaseModel):
     social_account_id: UUID
     status: str
     scheduled_at: datetime | None
+    error_message: str | None
     created_at: datetime
     updated_at: datetime

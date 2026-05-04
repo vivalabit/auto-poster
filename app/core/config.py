@@ -36,6 +36,9 @@ class Settings(BaseSettings):
     media_max_video_duration_seconds: int = 600
     media_allowed_video_extensions: str = ".mp4,.mov"
     media_allowed_video_content_types: str = "video/mp4,video/quicktime"
+    tiktok_publish_default_privacy_level: str = "SELF_ONLY"
+    tiktok_publish_status_poll_attempts: int = 5
+    tiktok_publish_status_poll_interval_seconds: float = 2
 
     @property
     def database_url(self) -> str:
